@@ -1,0 +1,533 @@
+import org.rsbot.script.Script;
+import org.rsbot.script.ScriptManifest;
+import org.rsbot.script.methods.Game;
+import org.rsbot.script.methods.Skills;
+import org.rsbot.script.wrappers.RSNPC;
+import org.rsbot.event.listeners.PaintListener;
+import org.rsbot.script.util.Timer;
+
+import java.awt.;
+import java.util.HashMap;
+
+@SuppressWarnings(unused)
+
+@ScriptManifest(
+		authors = { YotsuBotfds },
+		name = yBarb,
+		description = Power fishes trout and salmon at the Barbarian Village fishing location.,
+		version = 1.3)
+
+public class yBarb extends Script implements PaintListener {
+	
+	up to date javadocs AND source
+
+	private final static int TROUT = 335;
+	private final static int SALMON = 331;
+	private final static int SPOT = 328;
+	private final static int ROD = 309;
+	private final static int FEATHER = 314;
+	
+	private int startExp;
+	private int expGained;
+	
+	public int expHour;
+	public long startTime;
+	
+	RSNPC Spot;
+	RSNPC SPOt;
+	
+	public String getStatus;
+	
+	public boolean onStart(){
+		startExp = skills.getCurrentExp(Skills.FISHING);
+		startTime = System.currentTimeMillis();
+		return true;
+	}
+	
+	@Override
+	public int loop() {
+		
+		int num = random(1,10);
+
+		if(!inventory.contains(FEATHER)  !inventory.contains(ROD)){
+			Logs out if there isn't a rod or feathers in the player's inventory.
+			if(num == 4){
+				antiban();
+			}
+			getStatus = No supplies - Logging out;
+			
+			sleep(5000, 7500);
+			
+            game.logout(true);
+            sleep(500,1000);
+            stopScript();
+            
+            
+        }else if (!inventory.isFull() && getMyPlayer().getAnimation() != 623){
+        	
+            if (atSpot()){
+            	Fishes if at a fishing spot, if not, goes to the other spot.
+            	antiban();
+            	getStatus = Fishing;
+                fish();
+                
+                antiban();
+                
+                sleep(1000, 2000);
+                
+            }else {
+            	Walk to other fishing spot if there isnt one visible.
+            	
+            	getStatus = Finding fishing spot;
+            	
+            	Spot = npcs.getNearest(SPOT);
+        	    if(Spot != null) {
+        	    if(!Spot.isOnScreen()) {
+        	    SPOt = npcs.getNearest(SPOT);
+        	    walking.walkTileMM(SPOt.getLocation(), 3, 6);
+        	    }}
+        	    
+        	    sleep(500, 1000);
+        	    
+        	    antiban();
+        	    
+            }
+            
+        }else if (inventory.isFull()){
+        	Drop everything except rod and feathers
+        	
+        	getStatus = Dropping fish;
+        	
+            sleep(500, 1000);  
+            dropAll();
+        }
+	    
+		return random(300,500);
+	}
+
+	public boolean atSpot(){
+		Spot = npcs.getNearest(SPOT);
+		if(Spot.isOnScreen()){
+			return true;
+		}
+		return false;
+	}
+	
+	public void fish(){
+		Spot = npcs.getNearest(SPOT);
+		
+		if(Spot != null){
+			Spot.interact(Lure);
+			sleep(4000, 5000);
+		}
+	}
+	
+	public void dropAll(){
+		mouse.setSpeed(3);
+		inventory.dropAllExcept(ROD, FEATHER);
+		sleep(500, 750);
+	}
+
+	
+	@SuppressWarnings(deprecation)
+	
+	Code for antiban
+	public void antiban(){
+		int num = random(0,25);
+		
+		int[] tabs = { Game.TAB_CLAN_CHAT, Game.CHAT_OPTION,
+				Game.TAB_INVENTORY, Game.TAB_QUESTS, Game.TAB_FRIENDS };
+		
+		switch(num){
+		case 1
+			getStatus = Anti-ban;
+			mouse.moveOffScreen();
+			sleep(6000, 10000);
+			
+			if (game.getCurrentTab() != Game.TAB_STATS) {
+				game.openTab(Game.TAB_STATS);
+				sleep(250, 500);
+			}
+			interfaces.getComponent(320, 37).doHover();
+			sleep(random(1000, 2000));
+			
+		
+		case 2
+			
+			camera.setAngle(random(1, 359));
+			if (random(1, 5) == 1) {
+				mouse.moveSlightly();
+			}
+			
+		case 3
+			
+			mouse.moveSlightly();
+			sleep(120);
+			
+			
+		case 4
+			
+			
+			int tab = random(0, tabs.length);
+			
+			
+			
+			if (game.getCurrentTab() != tab) {
+				game.openTab(tabs[tab]);
+				sleep(250, 500);
+			}
+			mouse.move(random(565, 700), random(245, 400));
+			sleep(900, 1500);
+			
+			
+		case 5
+			
+			camera.setAngle(random(1, 359));
+		
+		}
+		
+	}
+	
+	
+	Paint
+	
+	
+	private HashMapPoint, Long clickedPoints = new HashMapPoint, Long();
+	
+	private void drawMouse(Graphics g){
+		
+		
+		
+		g.setColor(new Color(255, 140, 0, 180));
+		Point loc = mouse.getLocation();
+		g.fillRect(loc.x - 7, loc.y - 1, 15, 3);
+		g.fillRect(loc.x - 1, loc.y - 7, 3, 15);
+		g.drawLine(loc.x - 8, loc.y, loc.x - 8, loc.y);
+		g.drawLine(loc.x + 8, loc.y, loc.x + 8, loc.y);
+		g.drawLine(loc.x, loc.y - 8, loc.x, loc.y - 8);
+		g.drawLine(loc.x, loc.y + 8, loc.x, loc.y + 8);
+		final long time = System.currentTimeMillis() - mouse.getPressTime();
+		if(time = 0 && time = 1500)
+			clickedPoints.put(mouse.getPressLocation(), mouse.getPressTime());
+		for(Point point  clickedPoints.keySet()){
+			if(System.currentTimeMillis() - clickedPoints.get(point)  1500){
+				clickedPoints.remove(point);
+				continue; 
+			}
+			g.fillRect(point.x - 5, point.y - 5, 4, 4);
+			g.fillRect(point.x + 2, point.y - 5, 4, 4);
+			g.fillRect(point.x + 2, point.y + 2, 4, 4);
+			g.fillRect(point.x - 5, point.y + 2, 4, 4);
+		}
+	}
+	
+    START Code generated using Enfilade's Easel
+    private final Color color1 = new Color(204, 255, 102);
+    private final Color color2 = new Color(0, 0, 0);
+
+    private final BasicStroke stroke1 = new BasicStroke(1);
+
+    private final Font font1 = new Font(Arial, 0, 9);
+    private final Font font2 = new Font(Arial, 0, 13);
+    private final Font font3 = new Font(Arial, 0, 12);
+    
+    public void onRepaint(Graphics g1) {
+    	expGained = skills.getCurrentExp(Skills.FISHING) - startExp;
+    	expHour = (int) ((expGained)  3600000D  (System
+    			.currentTimeMillis() - startTime));
+        Graphics2D g = (Graphics2D)g1;
+        g.setColor(color1);
+        g.fillRect(351, 224, 162, 103);
+        g.setColor(color2);
+        g.setStroke(stroke1);
+        g.drawRect(351, 224, 162, 103);
+        g.setColor(color1);
+        g.fillRect(5, 320, 112, 18);
+        g.setColor(color2);
+        g.drawRect(5, 320, 112, 18);
+        g.setFont(font1);
+        g.drawString(yBarb PowerFisher, 8, 334);
+        g.drawString(yBarb PowerFisher, 8, 334);
+        g.setFont(font2);
+        g.drawString(Run-Time   + Timer.format(System.currentTimeMillis() - startTime), 356, 240);
+        g.drawString(EXP Gained   + expGained, 356, 262);
+        g.drawString(EXP ph   + Math.round(expHour  1000) +k, 355, 285);
+        g.setFont(font3);
+        if(getStatus == null){
+        	getStatus = Nothing;
+        	g.drawString(Status   + getStatus, 353, 317);
+        } else {
+        	g.drawString(Status   + getStatus, 353, 317);
+        	
+        }
+        END Code generated using Enfilade's Easel
+        drawMouse(g);
+    }
+
+}
+import java.awt.BasicStroke;
+import java.awt.Color;
+import java.awt.Font;
+import java.awt.Graphics;
+import java.awt.Graphics2D;
+import java.awt.Point;
+import java.util.HashMap;
+
+import org.rsbot.event.listeners.PaintListener;
+import org.rsbot.script.Script;
+import org.rsbot.script.ScriptManifest;
+import org.rsbot.script.methods.Game;
+import org.rsbot.script.methods.Skills;
+import org.rsbot.script.util.Timer;
+import org.rsbot.script.wrappers.RSLocalPath;
+import org.rsbot.script.wrappers.RSNPC;
+import org.rsbot.script.wrappers.RSTile;
+
+@ScriptManifest(authors = { YotsuBotfds }, name = yBarb, description = The Greatest PowerFisher in Barbarian Village ~ YotsuBotfds, version = 1.3)
+public class yBarb extends Script implements PaintListener {
+
+	 Script Variables
+	@SuppressWarnings(unused)
+	private final static int TROUT = 335, SALMON = 331, SPOT = 328, ROD = 309,
+			FEATHER = 314;
+
+	private int startExp;
+	private int expGained;
+	public int expHour;
+	public long startTime;
+
+	public String getStatus;
+
+	private HashMapPoint, Long clickedPoints = new HashMapPoint, Long();
+
+	 Paint
+	private final Color color1 = new Color(204, 255, 102);
+	private final Color color2 = new Color(0, 0, 0);
+
+	private final BasicStroke stroke1 = new BasicStroke(1);
+
+	private final Font font1 = new Font(Arial, 0, 9);
+	private final Font font2 = new Font(Arial, 0, 13);
+	private final Font font3 = new Font(Arial, 0, 12);
+
+	private void autoUpdate(){
+		try{
+			final double currentVersion = getClass().getAnnotation(ScriptManifest.class).version();
+			time for git ) ill brb. make an updatable page online so you can read it and change it.
+			if you can figure out how to do it on git, great. brb 10-15m in
+		}catch(Exception e){
+			log(Color.red, Failed to auto-update yBarb);
+		}
+	}
+	
+	public boolean onStart() {
+		autoUpdate();
+		log(Color.BLUE, Welcome To My Barbarian Village Powerfisher!);
+
+		startExp = skills.getCurrentExp(Skills.FISHING);
+		startTime = System.currentTimeMillis();
+		return true;
+	}
+
+	@Override
+	public int loop() {
+		RSNPC spot = npcs.getNearest(SPOT);
+		int num = random(1, 10);
+
+		if (!inventory.contains(FEATHER)  !inventory.contains(ROD)) {
+			 Will Log Out If No Feather or Rod Is In Inventory
+			if (num == 4) {
+				antiban();
+			}
+
+			getStatus = No supplies - Logging out;
+			sleep(random(3000, 5500));
+			game.logout(true);
+			stopScript(true);
+
+		} else if (!inventory.isFull() && getMyPlayer().getAnimation() != 623) {
+			final RSNPC newSpot = npcs.getNearest(SPOT);
+			if(newSpot != null && !newSpot.getLocation().equals(spot.getLocation())){
+				walkTo(newSpot);
+				getStatus = Finding fishing spot!; lol gotta yell at em P
+			}
+			if (atSpot()) {
+				 Will Fish If The Spot Is On Screen!
+				getStatus = Fishing;
+				fish();
+				antiban();
+				return random(1000, 2000);
+			} else {
+				return random(1000, 2000);
+			}
+
+		} else if (inventory.isFull()) {
+			 Drop The Fish!
+			getStatus = Dropping Fish!;
+			sleep(500, 1000);
+			dropAll();
+		}
+		
+		return random(300, 500);
+	}
+	private void walkTo(RSNPC npc){
+		screw simple S
+		long lastMove = System.currentTimeMillis(); yeahum can i do something before u start kk
+		final RSLocalPath path = (RSLocalPath)walking.getPath(npc.getLocation());
+		while(!npc.isOnScreen() && lastMove - System.currentTimeMillis()  15000){
+			final RSTile dest = walking.getDestination();
+			final RSTile next = path.getNext();
+			if(dest != null && next != null && calc.distanceBetween(dest, next)  4)
+				return;
+			if(dest == null  calc.distanceTo(dest) = random(6, 9)){
+				if(path.traverse()){
+					lastMove = System.currentTimeMillis();
+				}
+			}
+		}
+	}
+
+	 atSpot Method
+	public boolean atSpot() {
+		RSNPC spot = npcs.getNearest(SPOT);
+		return spot != null && spot.isOnScreen();
+
+	}
+
+	 fish Method
+	public void fish() {
+		RSNPC spot = npcs.getNearest(SPOT);
+		if (spot != null) {
+			if (spot.isOnScreen()) {
+				spot.interact(Lure);
+				sleep(random(4000, 5000));
+			}
+		}
+	}
+
+	 dropAll Method
+	public void dropAll() {
+		mouse.setSpeed(random(4, 8));
+		inventory.dropAllExcept(ROD, FEATHER);
+		sleep(500, 750);
+	}
+
+	 antiBan Method
+	@SuppressWarnings(deprecation)
+	public void antiban() {
+		int num = random(0, 25);
+
+		int[] tabs = { Game.TAB_CLAN_CHAT, Game.CHAT_OPTION,
+				Game.TAB_INVENTORY, Game.TAB_QUESTS, Game.TAB_FRIENDS };
+
+		switch (num) {
+		case 1
+			getStatus = Anti-ban;
+			mouse.moveOffScreen();
+			sleep(6000, 10000);
+
+			if (game.getCurrentTab() != Game.TAB_STATS) {
+				game.openTab(Game.TAB_STATS);
+				sleep(250, 500);
+			}
+			interfaces.getComponent(320, 37).doHover();
+			sleep(random(1000, 2000));
+
+		case 2
+			camera.setAngle(random(1, 359));
+			if (random(1, 5) == 1) {
+				mouse.moveSlightly();
+			}
+
+		case 3
+			mouse.moveSlightly();
+			sleep(120);
+
+		case 4
+			int tab = random(0, tabs.length);
+
+			if (game.getCurrentTab() != tab) {
+				game.openTab(tabs[tab]);
+				sleep(250, 500);
+			}
+			mouse.move(random(565, 700), random(245, 400));
+			sleep(900, 1500);
+
+		case 5
+
+			camera.setAngle(random(1, 359));
+
+		}
+
+	}
+
+	 onFinish Method
+	public void onFinish() {
+		log(Color.BLUE,
+				Thanks For Using The Greatest Barbarian Village PowerFisher!);
+		env.saveScreenshot(true);
+		stopScript(true);
+	}
+
+	 drawMouse Method
+	private void drawMouse(Graphics g) {
+
+		g.setColor(new Color(255, 140, 0, 180));
+		Point loc = mouse.getLocation();
+		g.fillRect(loc.x - 7, loc.y - 1, 15, 3);
+		g.fillRect(loc.x - 1, loc.y - 7, 3, 15);
+		g.drawLine(loc.x - 8, loc.y, loc.x - 8, loc.y);
+		g.drawLine(loc.x + 8, loc.y, loc.x + 8, loc.y);
+		g.drawLine(loc.x, loc.y - 8, loc.x, loc.y - 8);
+		g.drawLine(loc.x, loc.y + 8, loc.x, loc.y + 8);
+		final long time = System.currentTimeMillis() - mouse.getPressTime();
+		if (time = 0 && time = 1500)
+			clickedPoints.put(mouse.getPressLocation(), mouse.getPressTime());
+		for (Point point  clickedPoints.keySet()) {
+			if (System.currentTimeMillis() - clickedPoints.get(point)  1500) {
+				clickedPoints.remove(point);
+				continue;
+			}
+			g.fillRect(point.x - 5, point.y - 5, 4, 4);
+			g.fillRect(point.x + 2, point.y - 5, 4, 4);
+			g.fillRect(point.x + 2, point.y + 2, 4, 4);
+			g.fillRect(point.x - 5, point.y + 2, 4, 4);
+		}
+	}
+
+	 PaintListener Method
+	public void onRepaint(Graphics g1) {
+		expGained = skills.getCurrentExp(Skills.FISHING) - startExp;
+		expHour = (int) ((expGained)  3600000D  (System.currentTimeMillis() - startTime));
+		Graphics2D g = (Graphics2D) g1;
+		g.setColor(color1);
+		g.fillRect(351, 224, 162, 103);
+		g.setColor(color2);
+		g.setStroke(stroke1);
+		g.drawRect(351, 224, 162, 103);
+		g.setColor(color1);
+		g.fillRect(5, 320, 112, 18);
+		g.setColor(color2);
+		g.drawRect(5, 320, 112, 18);
+		g.setFont(font1);
+		g.drawString(yBarb PowerFisher, 8, 334);
+		g.drawString(yBarb PowerFisher, 8, 334);
+		g.setFont(font2);
+		g.drawString(
+				Run-Time  
+						+ Timer.format(System.currentTimeMillis() - startTime),
+				356, 240);
+		g.drawString(EXP Gained   + expGained, 356, 262);
+		g.drawString(EXP ph   + Math.round(expHour  1000) + k, 355, 285);
+		g.setFont(font3);
+		if (getStatus == null) {
+			getStatus = Nothing;
+			g.drawString(Status   + getStatus, 353, 317);
+		} else {
+			g.drawString(Status   + getStatus, 353, 317);
+
+		}
+		drawMouse(g);
+	}
+
+}
